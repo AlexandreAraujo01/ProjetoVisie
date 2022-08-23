@@ -1,24 +1,27 @@
 from re import L
 import pymysql
+import bson.json_util as json_util
+import json
 
 class DbVisie:
     def __init__(self):
         self.conection = pymysql.connect(host="jobs.visie.com.br", database='alexandreroberto', user='alexandreroberto', password='YWxleGFuZHJl')
         self.db = self.conection.cursor()
     
+    
     def get_all_people(self):
         "pega todas as linhas do banco."
         query = "SELECT nome,data_admissao FROM `pessoas`;"
         self.db.execute(query)
         res = self.db.fetchall()
-        print(res)
+        return json.dumps(res,default=str)
 
     def specific_search(self,key,value):
         "pesquisa com filtra baseado em um campo"
         query = f'SELECT nome,data_admissao FROM `pessoas` WHERE `{key}` = "{value}"'
         self.db.execute(query)
         res = self.db.fetchone()
-        print(res)
+        return res
     
     def update_people(self,column,value,id):
         "atualiza uma linha baseado numa coluna escolhida"
