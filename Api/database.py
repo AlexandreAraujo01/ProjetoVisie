@@ -1,37 +1,49 @@
-from re import L
 import pymysql
 import bson.json_util as json_util
 import json
 
 class DbVisie:
     def __init__(self):
-        self.conection = pymysql.connect(host="jobs.visie.com.br", database='alexandreroberto', user='alexandreroberto', password='YWxleGFuZHJl')
+        # self.conection = pymysql.connect(host="jobs.visie.com.br", database='alexandreroberto', user='alexandreroberto', password='YWxleGFuZHJl')
+        # self.db = self.conection.cursor()
+
+        self.conection = pymysql.connect(host="localhost", database='mysql', user='root', password='admin',port=3306)
         self.db = self.conection.cursor()
     
     
     def get_all_people(self):
         "pega todas as linhas do banco."
-        query = "SELECT nome,data_admissao FROM `pessoas`;"
+        query = "SELECT id_pessoa,nome,data_admissao FROM `pessoas`;"
         self.db.execute(query)
         res = self.db.fetchall()
         return json.dumps(res,default=str)
 
-    def specific_search(self,key,value):
+    def specific_search(self,key,value,column):
         "pesquisa com filtra baseado em um campo"
-        query = f'SELECT nome,data_admissao FROM `pessoas` WHERE `{key}` = "{value}"'
+        query = f'SELECT {column} FROM `pessoas` WHERE `{key}` = "{value}"'
         self.db.execute(query)
-        res = self.db.fetchone()
-        return res
+        res = self.db.fetchall()
+        temp = str(res)
+        x = temp.replace("(","").replace("'","").replace(",","").replace(")","")
+        return json.dumps(x,default=str)
+
+    def specific_search2(self,key,value,column):
+        "pesquisa com filtra baseado em um campo"
+        query = f'SELECT {column} FROM `pessoas` WHERE `{key}` like "%{value}%"'
+        self.db.execute(query)
+        res = self.db.fetchall()
+        # temp = str(res)
+        # x = temp.replace("(","").replace("'","").replace(",","").replace(")","")
+        return json.dumps(res,default=str)
     
     def update_people(self,column,value,id):
         "atualiza uma linha baseado numa coluna escolhida"
         query = f'UPDATE `pessoas` set {column} = "{value}" where id_pessoa = {id}'
-        print(query)
         self.db.execute(query)
         res = self.db.fetchone()
         self.conection.commit()
         return res
-    
+         
     def insert_people(self,obj):
         "insere uma nova linha na banco"
         lst = []
